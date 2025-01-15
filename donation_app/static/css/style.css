@@ -1,0 +1,259 @@
+/* Global styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: black;  /* Black background */
+    color: white;  /* Text color for general content */
+}
+
+a {
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+/* Header Section */
+nav {
+    position: absolute;  /* Ensures the nav bar is on top of the background image */
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(44, 62, 80, 0.8);  /* Semi-transparent background for nav */
+    z-index: 10;  /* Ensures it stays on top of the hero section */
+}
+
+nav .logo a {
+    font-size: 24px;
+    color: white;
+    font-weight: bold;
+}
+
+nav .nav-links {
+    display: flex;
+    gap: 20px;
+}
+
+nav .nav-links .nav-link {
+    color: white;
+    font-size: 18px;
+}
+
+nav .cta-btn .btn {
+    background-color: #F39C12;  /* Cinnamon color */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+}
+
+nav .cta-btn .btn:hover {
+    background-color: #E67E22;
+}
+
+/* Hero Section */
+#hero {
+    background-image: url("{% static 'images/serving-food.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    height: 100vh;  /* Full viewport height */
+    width: 100%;  /* Full width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+}
+
+#hero .hero-content h1 {
+    font-size: 48px;
+    margin: 0;
+}
+
+#hero .hero-content p {
+    font-size: 20px;
+}
+
+.hero-buttons .btn {
+    margin: 10px;
+    background-color: #F39C12;  /* Cinnamon color */
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.hero-buttons .btn:hover {
+    background-color: #E67E22;
+}
+
+.hero-buttons .btn.secondary {
+    background-color: #1ABC9C;  /* Teal color */
+}
+
+.hero-buttons .btn.secondary:hover {
+    background-color: #16A085;
+}
+
+/* About Section */
+#about-us {
+    padding: 50px;
+    text-align: center;
+    background-color: #ECF0F1;
+}
+
+#about-us h2 {
+    font-size: 36px;
+}
+
+#about-us p {
+    font-size: 18px;
+    margin: 20px 0;
+}
+
+.impact-metrics {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.impact-metrics .metric {
+    text-align: center;
+}
+
+.impact-metrics .metric h3 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* How It Works Section */
+#how-it-works {
+    padding: 50px;
+    text-align: center;
+}
+
+#how-it-works h2 {
+    font-size: 36px;
+}
+
+.how-it-works-content {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.how-it-works-content .step {
+    width: 200px;
+}
+
+.how-it-works-content .step h3 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Featured Stories Section */
+#get-involved {
+    padding: 50px;
+    background-color: #F39C12;  /* Cinnamon color */
+    color: white;
+    text-align: center;
+}
+
+#get-involved h2 {
+    font-size: 36px;
+}
+
+.stories {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.stories .story {
+    width: 250px;
+}
+
+.stories .story img {
+    width: 100%;
+    height: auto;
+}
+
+.stories .story p {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+/* Call-to-Action Section */
+#cta {
+    padding: 50px;
+    text-align: center;
+    background-color: #2C3E50;
+    color: white;
+}
+
+#cta h2 {
+    font-size: 36px;
+}
+
+#cta p {
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+.cta-buttons .btn {
+    margin: 10px;
+    background-color: #F39C12;  /* Cinnamon color */
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.cta-buttons .btn:hover {
+    background-color: #E67E22;
+}
+
+.cta-buttons .btn.secondary {
+    background-color: #1ABC9C;  /* Teal color */
+}
+
+.cta-buttons .btn.secondary:hover {
+    background-color: #16A085;
+}
+
+/* Footer Section */
+footer {
+    background-color: #2C3E50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+footer .footer-links a {
+    color: white;
+    font-size: 16px;
+}
+
+footer .footer-links a:hover {
+    text-decoration: underline;
+}
+
+footer .contact-info {
+    margin: 20px 0;
+}
+
+footer .social-icons {
+    margin: 10px 0;
+}
+
+footer p {
+    font-size: 14px;
+    margin-top: 10px;
+}

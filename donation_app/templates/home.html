@@ -8,14 +8,110 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+    <!-- Header Section -->
     <nav>
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'donate_food' %}">Donate Food</a>
+        <div class="logo">
+            <a href="{% url 'home' %}">DonateToFeed</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#about-us" class="nav-link">About Us</a></li>
+            <li><a href="#how-it-works" class="nav-link">How It Works</a></li>
+            <li><a href="#get-involved" class="nav-link">Get Involved</a></li>
+            <li><a href="#contact-us" class="nav-link">Contact Us</a></li>
+        </ul>
+        <div class="cta-btn">
+            <a href="{% url 'donate_food' %}" class="btn">Donate Food</a>
+        </div>
     </nav>
-    <header>
-        <h1>Welcome to Food Donation Hub</h1>
-        <p>Make a difference by donating surplus food to those in need.</p>
-        <a href="{% url 'donate_food' %}" class="btn">Donate Food</a>
-    </header>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="hero-content">
+            <h1>Bridging Communities, One Meal at a Time</h1>
+            <p>Join us in reducing food waste and addressing hunger through seamless digital solutions powered by DocuSign.</p>
+            <div class="hero-buttons">
+                <a href="{% url 'donate_food' %}" class="btn">Donate Food</a>
+                <a href="#get-involved" class="btn secondary">Get Started</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about-us">
+        <h2>What We Do</h2>
+        <p>DonateToFeed leverages technology to connect food donors with non-profits and recipients in need, ensuring no meal goes to waste.</p>
+        <div class="impact-metrics">
+            <div class="metric">
+                <h3>Meals Saved</h3>
+                <p>50,000</p>
+            </div>
+            <div class="metric">
+                <h3>Food Donated</h3>
+                <p>20 Tons</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works">
+        <h2>How It Works</h2>
+        <div class="how-it-works-content">
+            <div class="step">
+                <h3>For Donors</h3>
+                <p>Fill out food details → Sign agreement → Donation scheduled for pickup/delivery.</p>
+            </div>
+            <div class="step">
+                <h3>For Non-Profits</h3>
+                <p>Manage donations via the dashboard → Track agreements → Measure impact.</p>
+            </div>
+            <div class="step">
+                <h3>For Recipients</h3>
+                <p>Get notified of donations → Confirm receipt.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Stories Section -->
+    <section id="get-involved">
+        <h2>Impact in Action</h2>
+        <div class="stories">
+            <div class="story">
+                <img src="{% static 'images/serving-food.jpg' %}" alt="Donor">
+                <p>"The process was seamless, and it felt great to contribute!" - John Doe, Donor</p>
+            </div>
+            <div class="story">
+                <img src="{% static 'images/serving-food.jpg' %}" alt="Non-Profit">
+                <p>"Our organization has made a bigger impact with DonateToFeed." - Jane Smith, Non-Profit</p>
+            </div>
+            <div class="story">
+                <img src="{% static 'images/serving-food.jpg' %}" alt="Recipient">
+                <p>"Thanks to DonateToFeed, I received food just when I needed it." - Tom Brown, Recipient</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call-to-Action Section -->
+    <section id="cta">
+        <h2>Join the Movement</h2>
+        <p>Whether you're a donor or a non-profit, your participation can create lasting change.</p>
+        <div class="cta-buttons">
+            <a href="{% url 'donate_food' %}" class="btn">Start Donating</a>
+            <a href="#get-involved" class="btn secondary">Create an Account</a>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="footer-links">
+            <a href="#privacy-policy">Privacy Policy</a> | <a href="#terms-of-service">Terms of Service</a> | <a href="#faq">FAQ</a>
+        </div>
+        <div class="contact-info">
+            <p>Email: info@donatetofeed.org | Phone: +123456789</p>
+            <div class="social-icons">
+                <!-- Add social media icons -->
+            </div>
+        </div>
+        <p>&copy; 2025 DonateToFeed. All Rights Reserved.</p>
+    </footer>
 </body>
 </html>
