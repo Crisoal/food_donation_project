@@ -3,7 +3,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: black;  /* Black background */
+    background-color: black;  
     color: white;  /* Text color for general content */
 }
 
@@ -58,7 +58,7 @@ nav .cta-btn .btn:hover {
 
 /* Hero Section */
 #hero {
-    background-image: url("{% static 'images/serving-food.jpg' %}");
+    background-image: url('../images/serving-food.jpg');
     background-size: cover;
     background-position: center;
     height: 100vh;  /* Full viewport height */
