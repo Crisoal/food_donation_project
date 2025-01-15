@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Donation Hub</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'donate_food' %}">Donate Food</a>
+        <a href="{% url 'about' %}">About Us</a>
+    </nav>
+    <header>
+        <h1>Welcome to Food Donation Hub</h1>
+        <p>Make a difference by donating surplus food to those in need.</p>
+        <a href="{% url 'donate_food' %}" class="btn">Donate Food</a>
+    </header>
+</body>
+</html>

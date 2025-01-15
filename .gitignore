@@ -1,0 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+*.egg-info/
+
+# Django stuff:
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+staticfiles/
+media/
+
+# Secrets
+.env
+*.key
+
+# VS Code settings
+.vscode/
+
+# Node and npm
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Docker-related files
+*.dockerignore
+docker-compose.override.yml
+
+# Python-related
+*.pyd
+*.pyo
+*.pdb
+*.egg
+*.egg-info/
+dist/
+build/
