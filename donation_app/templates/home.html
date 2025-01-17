@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 {% load static %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonateToFeed</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- Include Bootstrap CSS for modal styling -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
+
 <body>
     <!-- Header Section -->
     <nav>
@@ -20,7 +28,7 @@
             <li><a href="#contact-us" class="nav-link">Contact Us</a></li>
         </ul>
         <div class="cta-btn">
-            <a href="{% url 'donate_food' %}" class="btn">Donate Food</a>
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#donateModal">Donate Food</button>
         </div>
     </nav>
 
@@ -28,18 +36,41 @@
     <section id="hero">
         <div class="hero-content">
             <h1>Bridging Communities, One Meal at a Time</h1>
-            <p>Join us in reducing food waste and addressing hunger through seamless digital solutions powered by DocuSign.</p>
+            <p>Join us in reducing food waste and addressing hunger through seamless digital solutions powered by
+                DocuSign.</p>
             <div class="hero-buttons">
-                <a href="{% url 'donate_food' %}" class="btn">Donate Food</a>
+                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#donateModal">Donate
+                    Food</button>
                 <a href="#get-involved" class="btn secondary">Get Started</a>
             </div>
         </div>
     </section>
 
+    <!-- Modal for Donation Selection -->
+    <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- Added modal-dialog-centered class -->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="donateModalLabel">Donate Food</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you donating as a guest or a logged-in user?</p>
+                    <div class="d-flex justify-content-around mt-4">
+                        <a href="#login" class="btn btn-primary">Log In</a>
+                        <a href="{% url 'donate_food' %}" class="btn btn-secondary">Guest</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- About Section -->
     <section id="about-us">
         <h2>What We Do</h2>
-        <p>DonateToFeed leverages technology to connect food donors with non-profits and recipients in need, ensuring no meal goes to waste.</p>
+        <p>DonateToFeed leverages technology to connect food donors with non-profits and recipients in need, ensuring no
+            meal goes to waste.</p>
         <div class="impact-metrics">
             <div class="metric">
                 <h3>Meals Saved</h3>
@@ -103,7 +134,8 @@
     <!-- Footer Section -->
     <footer>
         <div class="footer-links">
-            <a href="#privacy-policy">Privacy Policy</a> | <a href="#terms-of-service">Terms of Service</a> | <a href="#faq">FAQ</a>
+            <a href="#privacy-policy">Privacy Policy</a> | <a href="#terms-of-service">Terms of Service</a> | <a
+                href="#faq">FAQ</a>
         </div>
         <div class="contact-info">
             <p>Email: info@donatetofeed.org | Phone: +123456789</p>
@@ -113,5 +145,10 @@
         </div>
         <p>&copy; 2025 DonateToFeed. All Rights Reserved.</p>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>
