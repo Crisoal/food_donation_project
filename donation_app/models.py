@@ -1,3 +1,5 @@
+# donation_app/models.py
+
 from django.db import models
 
 class Donor(models.Model):
@@ -7,8 +9,12 @@ class Donor(models.Model):
 
 class Donation(models.Model):
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE)
-    food_item = models.CharField(max_length=255)
-    quantity = models.PositiveIntegerField()
-    delivery_address = models.TextField()
+    food_items = models.JSONField()
+    pickup_address = models.TextField()
+    city = models.CharField(max_length=255)
+    region = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    postal_code = models.CharField(max_length=10)
+    agreement_sent = models.BooleanField(default=False)
     agreement_signed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

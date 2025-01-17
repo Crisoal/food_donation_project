@@ -88,7 +88,7 @@
             <p class="text-center">Thank you for choosing to donate. Please fill out the form below to provide the
                 details of your donation.</p>
 
-            <form method="POST" action="{% url 'agreement' %}" class="form">
+            <form method="POST" action="{% url 'submit_donation' %}" class="form" id="donation-form">
                 {% csrf_token %}
                 <!-- Donor Information -->
                 <div class="section-heading">Donor Information</div>
@@ -189,8 +189,8 @@
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="region">Region/State <span class="text-danger">*</span></label>
-                            <input type="text" id="region" name="region" class="form-control" placeholder="Enter your region"
-                                required>
+                            <input type="text" id="region" name="region" class="form-control"
+                                placeholder="Enter your region" required>
                         </div>
                     </div>
                     <div class="col-md-3">
@@ -263,6 +263,11 @@
                 </div>
             </form>
         </div>
+
+        <div id="progress-indicator" style="display: none;">
+            <p>Sending the agreement form to your email. Please wait...</p>
+        </div>
+        <div id="confirmation-message" style="display: none;"></div>
     </section>
 
 
@@ -281,9 +286,7 @@
         <p>&copy; 2025 DonateToFeed. All Rights Reserved.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
+
     <script>
         // Add more food donation fields dynamically
         document.getElementById('add-food').addEventListener('click', function () {
@@ -341,6 +344,41 @@
             }
         });
     </script>
+
+    <script>
+        document.getElementById('donation-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            document.getElementById('progress-indicator').style.display = 'block';
+
+            fetch("{% url 'submit_donation' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('progress-indicator').style.display = 'none';
+                    if (data.status === 'success') {
+                        document.getElementById('confirmation-message').textContent = data.message;
+                        document.getElementById('confirmation-message').style.display = 'block';
+                        document.getElementById('donation-form').style.display = 'none';
+                    } else {
+                        alert('Error: ' + JSON.stringify(data.errors));
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('progress-indicator').style.display = 'none';
+                    alert('Something went wrong. Please try again.');
+                });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
 
 </body>
 
