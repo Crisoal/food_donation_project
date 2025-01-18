@@ -13,3 +13,5 @@ class DonationForm(forms.Form):
     region = forms.CharField(max_length=255, label="Region/State", required=True)
     country = forms.CharField(max_length=255, label="Country", required=True)
     postal_code = forms.CharField(max_length=10, label="Postal Code", required=True)
+    pickup_date = forms.DateField(label="Preferred Pickup Date", required=True)
+    pickup_time = forms.TimeField(label="Preferred Pickup Time", required=True)

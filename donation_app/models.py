@@ -1,6 +1,7 @@
 # donation_app/models.py
 
 from django.db import models
+from django.utils import timezone
 
 class Donor(models.Model):
     name = models.CharField(max_length=255)
@@ -17,4 +18,6 @@ class Donation(models.Model):
     postal_code = models.CharField(max_length=10)
     agreement_sent = models.BooleanField(default=False)
     agreement_signed = models.BooleanField(default=False)
+    pickup_date = models.DateField(default=timezone.now)  # Default is current date
+    pickup_time = models.TimeField(default=timezone.now)  # Default is current time
     created_at = models.DateTimeField(auto_now_add=True)

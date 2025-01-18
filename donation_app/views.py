@@ -2,7 +2,6 @@
 
 from django.shortcuts import render, redirect
 from .forms import DonationForm
-from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from .models import Donor, Donation
 from django.db import transaction
@@ -13,6 +12,10 @@ def home(request):
     return render(request, 'home.html')
 
 def donate_food(request):
+    form = DonationForm()
+    return render(request, 'donate_food.html', {'form': form})
+
+def submit_donation(request):
     if request.method == 'POST':
         form = DonationForm(request.POST)
         if form.is_valid():
@@ -26,7 +29,7 @@ def donate_food(request):
                     }
                 )
 
-                # Save donation details
+                # Save donation details, including pickup date and time
                 donation = Donation.objects.create(
                     donor=donor,
                     food_items=form.cleaned_data['food_items'],
@@ -35,6 +38,8 @@ def donate_food(request):
                     region=form.cleaned_data['region'],
                     country=form.cleaned_data['country'],
                     postal_code=form.cleaned_data['postal_code'],
+                    pickup_date=form.cleaned_data['pickup_date'],  # New field
+                    pickup_time=form.cleaned_data['pickup_time'],  # New field
                 )
 
             # Send agreement asynchronously
@@ -49,10 +54,8 @@ def donate_food(request):
             })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors})
-    else:
-        form = DonationForm()
-    return render(request, 'donate_food.html', {'form': form})
 
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 def agreement(request):
     if request.method == 'POST':

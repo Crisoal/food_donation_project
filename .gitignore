@@ -22,6 +22,9 @@ media/
 # Secrets
 .env
 *.key
+code.py
+codeverifier.py
+migrations/
 
 # VS Code settings
 .vscode/
