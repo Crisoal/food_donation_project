@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,11 +58,11 @@ WSGI_APPLICATION = 'food_donation.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'food_donation_project',
-        'USER': 'crisproject',
-        'PASSWORD': 'Project123!',
-        'HOST': '127.0.0.1',  
-        'PORT': '3306',       # Default MySQL port
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='127.0.0.1'),
+        'PORT': config('DB_PORT', default='3306'),
     }
 }
 
