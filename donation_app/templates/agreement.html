@@ -1,29 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Agreement</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Food Donation Agreement</title>
 </head>
 <body>
-    <nav>
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'about' %}">About Us</a>
-    </nav>
-    <header>
-        <h1>Sign Agreement</h1>
-    </header>
-    <p>Please review and sign the donation agreement below.</p>
-    <form method="POST" action="{% url 'confirmation' %}">
-        {% csrf_token %}
-        <textarea readonly>
-I agree to donate the specified food items to Food Donation Hub. The organization will be responsible for the distribution of these items to non-profits in need.
-        </textarea>
-        <label for="signature">Your Signature:</label>
-        <input type="text" id="signature" name="signature" placeholder="Enter your full name" required>
-        <button type="submit">Confirm Donation</button>
-    </form>
+    <h1>Food Donation Agreement</h1>
+    <p>Dear {{ donor.name }},</p>
+    <p>Thank you for your generous donation. Below are the details of the donation agreement:</p>
+    <ul>
+        <li><strong>Food Items:</strong> {{ food_items }}</li>
+        <li><strong>Donor Address:</strong> {{ pickup_address }}</li>
+        <li><strong>Pickup Date and Time:</strong> {{ pickup_date }} at {{ pickup_time }}</li>
+    </ul>
+    <p>By signing this agreement, you confirm that the food items listed above will be donated to Food Donation Hub, and the organization will handle the distribution to non-profits in need.</p>
+    
+    <!-- Name, Signature, and Date placeholders -->
+    <p><strong>Donor's Name:</strong> <span style="color: gray;">/name1/</span></p>
+    <p><strong>Signature:</strong> <span style="color: gray;">/sn1/</span></p>
+    <p><strong>Date:</strong> <span style="color: gray;">/date1/</span></p>
+
+    <p>Please review, add your name, and sign the agreement to complete the process.</p>
 </body>
 </html>

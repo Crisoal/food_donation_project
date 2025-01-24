@@ -57,6 +57,86 @@ def submit_donation(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
+# Admin dashboard view
+def admin_dashboard(request):
+    """
+    Render the admin dashboard with donor and donation data.
+    """
+    donors = Donor.objects.all()
+    donations = Donation.objects.select_related('donor').all()
+    context = {
+        'donors': donors,
+        'donations': donations,
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+def get_donors(request):
+    if request.method == 'GET':
+        donors = Donor.objects.all()
+        data = [
+            {
+                'id': donor.id,
+                'name': donor.name,
+                'email': donor.email,
+                'phone': donor.phone,
+            }
+            for donor in donors
+        ]
+        return JsonResponse({'status': 'success', 'donors': data})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+def get_donations(request):
+    if request.method == 'GET':
+        donations = Donation.objects.select_related('donor').all()
+        data = [
+            {
+                'donation_id': donation.id,
+                'donor_name': donation.donor.name,
+                'donor_email': donation.donor.email,
+                'donor_phone': donation.donor.phone,
+                'food_items': donation.food_items,
+                'pickup_address': donation.pickup_address,
+                'city': donation.city,
+                'region': donation.region,
+                'country': donation.country,
+                'postal_code': donation.postal_code,
+                'pickup_date': donation.pickup_date.strftime('%Y-%m-%d'),
+                'pickup_time': donation.pickup_time.strftime('%H:%M:%S'),
+                'agreement_sent': donation.agreement_sent,
+                'agreement_signed': donation.agreement_signed,
+                'created_at': donation.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            }
+            for donation in donations
+        ]
+        return JsonResponse({'status': 'success', 'donations': data})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+# Non Profit dashboard view
+def non_profit_dashboard(request):
+    """
+    Render the non profit dashboard with donor and donation data.
+    """
+    donors = Donor.objects.all()
+    donations = Donation.objects.select_related('donor').all()
+    context = {
+        'donors': donors,
+        'donations': donations,
+    }
+    return render(request, 'non_profit_dashboard.html', context)
+
+# Logistics dashboard view
+def logistics_dashboard(request):
+    """
+    Render the logistics dashboard with donor and donation data.
+    """
+    donors = Donor.objects.all()
+    donations = Donation.objects.select_related('donor').all()
+    context = {
+        'donors': donors,
+        'donations': donations,
+    }
+    return render(request, 'logistics_dashboard.html', context)
+
 def agreement(request):
     if request.method == 'POST':
         return redirect('confirmation')
