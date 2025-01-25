@@ -25,6 +25,7 @@ media/
 code.py
 codeverifier.py
 migrations/
+users/signals.py
 
 # VS Code settings
 .vscode/
