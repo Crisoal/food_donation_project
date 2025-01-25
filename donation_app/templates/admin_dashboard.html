@@ -37,7 +37,10 @@
                     type="button" role="tab" aria-controls="nav-logistics" aria-selected="false">Logistics</button>
             </div>
 
-            <a class="nav-link navbar-nav ms-auto" href="{% url 'admin_dashboard' %}">Admin</a>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
 
         </div>
     </nav>

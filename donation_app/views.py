@@ -6,6 +6,9 @@ from django.http import JsonResponse
 from .models import Donor, Donation
 from django.db import transaction
 from .services.docusign_service import send_docusign_agreement  # Custom service for DocuSign API
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.models import Group
 import threading
 
 def home(request):
@@ -57,18 +60,6 @@ def submit_donation(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-# Admin dashboard view
-def admin_dashboard(request):
-    """
-    Render the admin dashboard with donor and donation data.
-    """
-    donors = Donor.objects.all()
-    donations = Donation.objects.select_related('donor').all()
-    context = {
-        'donors': donors,
-        'donations': donations,
-    }
-    return render(request, 'admin_dashboard.html', context)
 
 def get_donors(request):
     if request.method == 'GET':
@@ -111,11 +102,26 @@ def get_donations(request):
         return JsonResponse({'status': 'success', 'donations': data})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-# Non Profit dashboard view
+def is_admin(user):
+    return user.groups.filter(name='admin').exists()
+
+def is_nonprofit(user):
+    return user.groups.filter(name='nonprofit').exists()
+
+@login_required
+@user_passes_test(is_admin)
+def admin_dashboard(request):
+    donors = Donor.objects.all()
+    donations = Donation.objects.select_related('donor').all()
+    context = {
+        'donors': donors,
+        'donations': donations,
+    }
+    return render(request, 'admin_dashboard.html', context)
+
+@login_required
+@user_passes_test(is_nonprofit)
 def non_profit_dashboard(request):
-    """
-    Render the non profit dashboard with donor and donation data.
-    """
     donors = Donor.objects.all()
     donations = Donation.objects.select_related('donor').all()
     context = {
@@ -123,19 +129,6 @@ def non_profit_dashboard(request):
         'donations': donations,
     }
     return render(request, 'non_profit_dashboard.html', context)
-
-# Logistics dashboard view
-def logistics_dashboard(request):
-    """
-    Render the logistics dashboard with donor and donation data.
-    """
-    donors = Donor.objects.all()
-    donations = Donation.objects.select_related('donor').all()
-    context = {
-        'donors': donors,
-        'donations': donations,
-    }
-    return render(request, 'logistics_dashboard.html', context)
 
 def agreement(request):
     if request.method == 'POST':

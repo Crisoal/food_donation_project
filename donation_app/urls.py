@@ -3,6 +3,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from users.views import CustomLoginView, CustomLogoutView
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -16,14 +17,10 @@ urlpatterns = [
     path('get-donors/', views.get_donors, name='get_donors'),
     path('get-donations/', views.get_donations, name='get_donations'),
 
-    # Non Profit
+    # Non-Profit
     path('non-profit-dashboard/', views.non_profit_dashboard, name='non_profit_dashboard'),
 
-    # Logistics
-    path('logistics/', views.logistics_dashboard, name='logistics_dashboard'),
-
     # Auth
-    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('login/', CustomLoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
 ]
-
