@@ -27,8 +27,9 @@ urlpatterns = [
 
     # Non-Profit
     path('non-profit-dashboard/', views.non_profit_dashboard, name='non_profit_dashboard'),
+    path('api/nonprofit/profile/', views.fetch_nonprofit_profile, name='fetch_nonprofit_profile'),
 
     # Auth
-    path('login/', CustomLoginView.as_view(template_name='login.html'), name='login'),
+    path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', CustomLogoutView.as_view(), name='logout'),
 ]

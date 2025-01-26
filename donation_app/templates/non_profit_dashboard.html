@@ -16,7 +16,7 @@
     <!-- Custom styles for the dashboard -->
     <style>
         .sidebar {
-            height: 100%;
+            height: 100vh;
             width: 250px;
             position: fixed;
             top: 0;
@@ -37,82 +37,138 @@
             margin-left: 260px;
             padding: 20px;
         }
+
+
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .top-right i {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .top-right .btn {
+            padding: 5px 10px;
+        }
     </style>
 
 </head>
 
 <body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-                <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill"
-                    data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home"
-                    aria-selected="true">Home</button>
-                <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill"
-                    data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile"
-                    aria-selected="false">Profile</button>
-                <button class="nav-link" id="v-pills-donations-tab" data-bs-toggle="pill"
-                    data-bs-target="#v-pills-donations" type="button" role="tab" aria-controls="v-pills-donations"
-                    aria-selected="false">Donations</button>
-                <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill"
-                    data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages"
-                    aria-selected="false">Messages</button>
-                <button class="nav-link" id="v-pills-reporting-tab" data-bs-toggle="pill"
-                    data-bs-target="#v-pills-reporting" type="button" role="tab" aria-controls="v-pills-reporting"
-                    aria-selected="false">Reporting</button>
-            </div>
-        </div>
-
-        <!-- Content -->
-        <div class="content tab-content" id="v-pills-tabContent">
-            <!-- Home Section -->
-            <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-                <h3>Dashboard Overview</h3>
-                <div id="signed-agreements">
-                    <h5>Signed Donation Agreements</h5>
-                    <!-- Dynamic content will be loaded here -->
-                </div>
-                <div id="donation-status">
-                    <h5>Donation Status</h5>
-                    <!-- Dynamic content will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Profile Section -->
-            <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
-                <h3>Non-Profit Profile</h3>
-                <p>Details of the non-profit organization.</p>
-            </div>
-
-            <!-- Donations Section -->
-            <div class="tab-pane fade" id="v-pills-donations" role="tabpanel" aria-labelledby="v-pills-donations-tab">
-                <h3>Donation Management</h3>
-                <!-- Example of donation management -->
-                <button class="btn btn-primary" onclick="simulatePickup()">Simulate Pickup</button>
-                <div id="pickup-status"></div>
-            </div>
-
-            <!-- Messages Section (Logistics updates) -->
-            <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
-                <h3>Messages / Logistics Updates</h3>
-                <ul id="logistics-updates">
-                    <!-- Simulated logistics updates will be loaded here -->
-                </ul>
-            </div>
-
-            <!-- Reporting Section -->
-            <div class="tab-pane fade" id="v-pills-reporting" role="tabpanel" aria-labelledby="v-pills-reporting-tab">
-                <h3>Reporting and Impact</h3>
-                <div>
-                    <canvas id="impactChart" width="400" height="200"></canvas>
-                </div>
-                <div id="total-donated"></div>
-                <div id="meals-saved"></div>
-            </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+            <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home"
+                type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</button>
+            <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile"
+                type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">Profile</button>
+            <button class="nav-link" id="v-pills-donations-tab" data-bs-toggle="pill"
+                data-bs-target="#v-pills-donations" type="button" role="tab" aria-controls="v-pills-donations"
+                aria-selected="false">Donations</button>
+            <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages"
+                type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">Messages</button>
+            <button class="nav-link" id="v-pills-reporting-tab" data-bs-toggle="pill"
+                data-bs-target="#v-pills-reporting" type="button" role="tab" aria-controls="v-pills-reporting"
+                aria-selected="false">Reporting</button>
         </div>
     </div>
 
+    <!-- Content -->
+    <div class="content tab-content" id="v-pills-tabContent">
+        <!-- Top Right Section -->
+        <div class="top-right">
+            <i class="fa-regular fa-bell"></i>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+
+        <!-- Home Section -->
+        <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+            <div id="signed-agreements">
+                <h5>Signed Donation Agreements</h5>
+                <!-- Dynamic content will be loaded here -->
+            </div>
+            <div id="donation-status">
+                <h5>Donation Status</h5>
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+            <div class="container mt-4">
+                <!-- NGO Banner -->
+                <div class="position-relative mb-4">
+                    <img src="{% static 'images/serving-food.jpg' %}" class="img-fluid rounded-3 w-100"
+                        style="height: 350px; object-fit: cover;" alt="NGO Image">
+                    <h1 class="position-absolute top-50 start-0 translate-middle-y text-white bg-dark bg-opacity-75 px-4 py-2"
+                        id="org-name">
+                        Organization Name
+                    </h1>
+                </div>
+
+                <!-- NGO Details -->
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-6">
+                        <p><strong>Mission Statement:</strong> <span id="mission-statement">Empowering communities
+                                through sustainable development.</span></p>
+                        <p><strong>Address:</strong> <span id="address">123 Nonprofit Lane</span></p>
+                        <p><strong>Contact Number:</strong> <span id="contact-number">+123 456 7890</span></p>
+                        <p><strong>City:</strong> <span id="city">Nonprofit City</span></p>
+
+                        <!-- Edit Profile Button -->
+                        <button class="btn btn-primary mt-3" id="edit-profile-btn" onclick="editProfile()">Edit
+                            Profile</button>
+                    </div>
+
+                    <!-- Right Column -->
+                    <div class="col-md-6">
+                        <p><strong>Location:</strong> <span id="state">State</span>, <span id="country">Country</span>
+                        </p>
+                        <p><strong>Areas of Operation:</strong> <span id="areas-of-operation">Education,
+                                Healthcare</span></p>
+                        <p><strong>Requirements:</strong> <span id="requirements">Volunteers, Funding</span></p>
+                        <p><strong>Capacity:</strong> <span id="capacity">500 Beneficiaries</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Donations Section -->
+        <div class="tab-pane fade" id="v-pills-donations" role="tabpanel" aria-labelledby="v-pills-donations-tab">
+            <h3>Donation Management</h3>
+            <!-- Example of donation management -->
+            <button class="btn btn-primary" onclick="simulatePickup()">Simulate Pickup</button>
+            <div id="pickup-status"></div>
+        </div>
+
+        <!-- Messages Section (Logistics updates) -->
+        <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+            <h3>Messages / Logistics Updates</h3>
+            <ul id="logistics-updates">
+                <!-- Simulated logistics updates will be loaded here -->
+            </ul>
+        </div>
+
+        <!-- Reporting Section -->
+        <div class="tab-pane fade" id="v-pills-reporting" role="tabpanel" aria-labelledby="v-pills-reporting-tab">
+            <h3>Reporting and Impact</h3>
+            <div>
+                <canvas id="impactChart" width="400" height="200"></canvas>
+            </div>
+            <div id="total-donated"></div>
+            <div id="meals-saved"></div>
+        </div>
+    </div>
     <!-- jQuery and Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

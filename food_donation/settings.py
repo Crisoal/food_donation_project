@@ -12,6 +12,9 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 DEBUG = True
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
+
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
@@ -82,6 +85,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGOUT_REDIRECT_URL = 'login'  # Redirect to login page after logout
+LOGIN_URL = '/users/login/'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

@@ -1,11 +1,13 @@
 # donation_app/views.py
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import DonationForm
 from django.http import JsonResponse
-from .models import Donor, Donation
+from .models import Donor, Donation, NonprofitProfile
 from django.db import transaction
 from .services.docusign_service import send_docusign_agreement  # Custom service for DocuSign API
+from .services.matching_service import match_donation_to_nonprofit  # Import matching service
+from django.db import transaction
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group
@@ -43,15 +45,15 @@ def submit_donation(request):
                     region=form.cleaned_data['region'],
                     country=form.cleaned_data['country'],
                     postal_code=form.cleaned_data['postal_code'],
-                    pickup_date=form.cleaned_data['pickup_date'],  # New field
-                    pickup_time=form.cleaned_data['pickup_time'],  # New field
+                    pickup_date=form.cleaned_data['pickup_date'],
+                    pickup_time=form.cleaned_data['pickup_time'],
                 )
 
-            # Send agreement asynchronously
-            threading.Thread(
-                target=send_docusign_agreement,
-                args=(donor, donation)
-            ).start()
+                # Trigger donation matching process asynchronously
+                threading.Thread(
+                    target=match_donation_to_nonprofit,
+                    args=(donation,)
+                ).start()
 
             return JsonResponse({
                 'status': 'success',
@@ -61,7 +63,6 @@ def submit_donation(request):
             return JsonResponse({'status': 'error', 'errors': form.errors})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-
 
 def get_donors(request):
     if request.method == 'GET':
@@ -194,9 +195,6 @@ def update_total_donations_on_delete(sender, instance, **kwargs):
 def is_admin(user):
     return user.groups.filter(name='admin').exists()
 
-def is_nonprofit(user):
-    return user.groups.filter(name='nonprofit').exists()
-
 @login_required
 @user_passes_test(is_admin)
 def admin_dashboard(request):
@@ -208,16 +206,55 @@ def admin_dashboard(request):
     }
     return render(request, 'admin_dashboard.html', context)
 
+# Check if the user is in the 'nonprofit' group
+def is_nonprofit(user):
+    return user.groups.filter(name='nonprofit').exists()
+
 @login_required
 @user_passes_test(is_nonprofit)
 def non_profit_dashboard(request):
-    donors = Donor.objects.all()
-    donations = Donation.objects.select_related('donor').all()
+    try:
+        nonprofit_profile = NonprofitProfile.objects.get(user=request.user)
+    except NonprofitProfile.DoesNotExist:
+        messages.error(request, "No profile found for your account. Please contact support.")
+        return redirect('home')  # Redirect to a safe page
+
+    donations = Donation.objects.filter(matched_nonprofit=nonprofit_profile)
+    donors = Donor.objects.filter(donation__matched_nonprofit=nonprofit_profile).distinct()
+
     context = {
-        'donors': donors,
+        'nonprofit_profile': nonprofit_profile,
         'donations': donations,
+        'donors': donors,
     }
+
     return render(request, 'non_profit_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_nonprofit)
+def fetch_nonprofit_profile(request):
+    """
+    API endpoint to fetch nonprofit profile details for logged-in nonprofit users.
+    """
+    nonprofit_profile = get_object_or_404(NonprofitProfile, user=request.user)
+
+    # Return profile details as JSON
+    data = {
+        'organization_name': nonprofit_profile.organization_name,
+        'mission_statement': nonprofit_profile.mission_statement,
+        'address': nonprofit_profile.address,
+        'contact_number': nonprofit_profile.contact_number,
+        'city': nonprofit_profile.city,
+        'state': nonprofit_profile.state,
+        'country': nonprofit_profile.country,
+        'areas_of_operation': nonprofit_profile.areas_of_operation.split(','),  # Convert to list
+        'requirements_or_preferences': nonprofit_profile.requirements_or_preferences,
+        'capacity': nonprofit_profile.capacity,
+    }
+
+    return JsonResponse(data)
+
 
 def agreement(request):
     if request.method == 'POST':

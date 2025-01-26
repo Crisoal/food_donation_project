@@ -1,80 +1,78 @@
 # users/views.py
 
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, authenticate
-from .forms import RegistrationForm
-from django.contrib.auth import get_user_model
+from django.contrib.auth import login
+from .forms import RegistrationForm, NonprofitProfileForm
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib import messages
-
+from django.contrib.auth.models import Group
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
-        if form.is_valid():
+        nonprofit_form = NonprofitProfileForm(request.POST)
+        if form.is_valid() and nonprofit_form.is_valid():
+            # Create user
             user = form.save()
+
+            # Add user to nonprofit group
+            nonprofit_group, _ = Group.objects.get_or_create(name='nonprofit')
+            user.groups.add(nonprofit_group)
+            user.save()
+
+            # Log the user in
             login(request, user)
             return redirect('home')
     else:
         form = RegistrationForm()
-    return render(request, 'register.html', {'form': form})
-
+        nonprofit_form = NonprofitProfileForm()
+    
+    return render(request, 'register.html', {'form': form, 'nonprofit_form': nonprofit_form})
 
 class CustomLoginView(LoginView):
+    template_name = 'login.html'  # Points to the login form template
+
     def form_valid(self, form):
-        # Log the user in
-        login(self.request, form.get_user())
-
-        # Redirect based on group membership
+        """
+        Handle successful login.
+        """
         user = form.get_user()
-        if user.groups.filter(name='admin').exists():
-            return redirect('admin_dashboard')
-        elif user.groups.filter(name='nonprofit').exists():
-            return redirect('non_profit_dashboard')
-        else:
-            return redirect('home')  # Default redirect
+        login(self.request, user)
 
-    def form_invalid(self, form):
-        # Handle invalid login attempt
-        messages.error(self.request, "Invalid username or password.")
-        return redirect('login')  # Redirect to login page
+        # Redirect user based on their group
+        if user.groups.filter(name='admin').exists():
+            return redirect('admin_dashboard')  # Admin's dashboard
+        elif user.groups.filter(name='nonprofit').exists():
+            return redirect('non_profit_dashboard')  # Nonprofit's dashboard
+        else:
+            return redirect('home')  # Default for other users without a specific group
 
     def get(self, request, *args, **kwargs):
-        # Ensure unauthenticated users can access the login page
+        """
+        Override GET method to handle redirection for already authenticated users.
+        """
         if request.user.is_authenticated:
-            return redirect('home')
+            # Redirect authenticated users to their respective dashboards
+            return redirect(self.get_success_url())
         return super().get(request, *args, **kwargs)
 
+    def get_success_url(self):
+        """
+        Determine the post-login redirect URL.
+        """
+        user = self.request.user
+        if user.groups.filter(name='admin').exists():
+            return 'admin_dashboard'  # Admin dashboard URL name
+        elif user.groups.filter(name='nonprofit').exists():
+            return 'non_profit_dashboard'  # Nonprofit dashboard URL name
+        return 'home'  # Default homepage URL name
 
 class CustomLogoutView(LogoutView):
     """
     Custom LogoutView to handle post-logout redirection.
     """
     def dispatch(self, request, *args, **kwargs):
-        # You can add custom actions here if needed
         response = super().dispatch(request, *args, **kwargs)
         return redirect('login')  # Redirect to login page after logout
-
-
-def create_default_users():
-    User = get_user_model()
-
-    # Create admin_user
-    admin_user, created = User.objects.get_or_create(
-        username='admin_user',
-        defaults={'email': 'admin@donatetofeed.com'}
-    )
-    if created:
-        admin_user.set_password('admin246')
-        admin_user.save()
-        print("Admin user created!")
-
-    # Create nonprofit_user
-    nonprofit_user, created = User.objects.get_or_create(
-        username='nonprofit_user',
-        defaults={'email': 'apinkenonprofit@donatetofeed.com'}
-    )
-    if created:
-        nonprofit_user.set_password('apinkeNonprofit26')
-        nonprofit_user.save()
-        print("Nonprofit user created!")

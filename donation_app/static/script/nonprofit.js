@@ -1,5 +1,33 @@
 // Script for AJAX data fetching
 
+document.addEventListener('DOMContentLoaded', () => {
+    // Fetch profile details from the API
+    const fetchProfile = async () => {
+        try {
+            const response = await fetch('/api/nonprofit/profile/');
+            if (!response.ok) throw new Error('Failed to fetch profile details');
+            const profile = await response.json();
+
+            // Populate the profile section dynamically
+            document.querySelector('#org-name').textContent = profile.organization_name;
+            document.querySelector('#mission-statement').textContent = profile.mission_statement;
+            document.querySelector('#address').textContent = profile.address;
+            document.querySelector('#contact-number').textContent = profile.contact_number;
+            document.querySelector('#city').textContent = profile.city;
+            document.querySelector('#state').textContent = profile.state;
+            document.querySelector('#country').textContent = profile.country;
+            document.querySelector('#areas-of-operation').textContent = profile.areas_of_operation.join(', ');
+            document.querySelector('#requirements').textContent = profile.requirements_or_preferences;
+            document.querySelector('#capacity').textContent = profile.capacity;
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
+
+    fetchProfile();
+});
+
+
     $(document).ready(function () {
         // Fetch signed agreements
         fetch('/api/get_signed_agreements/')
