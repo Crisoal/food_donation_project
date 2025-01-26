@@ -14,7 +14,15 @@ urlpatterns = [
 
     # Admin
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    
+    # Admin/Donors
     path('get-donors/', views.get_donors, name='get_donors'),
+    path('get-donor/<int:donor_id>/', views.get_donor, name='get_donor'),
+    path('add-donor/', views.add_donor, name='add_donor'),
+    path('edit-donor/<int:donor_id>/', views.edit_donor, name='edit_donor'),
+    path('delete-donor/<int:donor_id>/', views.delete_donor, name='delete_donor'),
+    
+    # Admin/Donations
     path('get-donations/', views.get_donations, name='get_donations'),
 
     # Non-Profit

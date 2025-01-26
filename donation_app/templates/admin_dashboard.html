@@ -1,22 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load static %}
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
     <title>Admin Dashboard</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://kit.fontawesome.com/db37cdae57.js" crossorigin="anonymous"></script>
+
 </head>
 
 <body>
 
     <style>
-        #nav-tab{
+        #nav-tab {
             border-bottom: none;
+        }
+
+        .tab-content {
+            margin: 2% 4% 1% 4%;
         }
     </style>
 
@@ -93,20 +102,153 @@
 
         <div class="tab-pane fade" id="nav-donors" role="tabpanel" aria-labelledby="nav-donors-tab" tabindex="0">
             <h2>Manage Donors</h2>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="donor-table-body">
-                    <!-- Data will be dynamically populated -->
-                </tbody>
-            </table>
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <input type="text" id="search-donors" class="form-control" placeholder="Search by name or email">
+                </div>
+                <div class="col-md-2">
+                    <select id="filter-donors" class="form-control">
+                        <option value="">Filter by</option>
+                        <option value="frequency">Donation Frequency</option>
+                        <option value="location">Location</option>
+                        <option value="type">Donation Type</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-secondary" id="export-donors">Export CSV</button>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-primary" id="add-donor" data-bs-toggle="modal"
+                        data-bs-target="#addDonorModal">Add Donor</button>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Donor List Table -->
+                <div class="col-md-8">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="donor-table-body">
+                            <!-- Data will be dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Donor Details Section -->
+                <div class="col-md-4">
+                    <div id="donor-details" class="card p-3" style="display: none;">
+                        
+                        <div class="text-center">
+                            <h5>Donor ID: <span id="donor-id"></span></h5>
+                            <div id="donor-photo"
+                                 class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto"
+                                 style="width: 100px; height: 100px;">
+                                <span>Photo</span>
+                            </div>
+                            <h3 id="donor-name" class="mt-2"></h3>
+                            <div id="contact-actions" class="mt-2">
+                                <!-- Call and Email icons will be injected here -->
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <p><strong>Total Donations:</strong> <span id="total-donations"></span></p>
+                        <h5>Donation History:</h5>
+                        <ul id="donation-history" class="list-group">
+                            <!-- Donation history dynamically populated -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Donor Modal -->
+            <div class="modal fade" id="addDonorModal" tabindex="-1" aria-labelledby="addDonorModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addDonorModalLabel">Add Donor</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="add-donor-form">
+                                <div class="mb-3">
+                                    <label for="donor-name-input" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="donor-name-input" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="donor-email-input" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="donor-email-input" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="donor-phone-input" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="donor-phone-input" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="donor-address-input" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="donor-address-input">
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="add-another-donor">
+                                    <label class="form-check-label" for="add-another-donor">Add another</label>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="submit-add-donor">Submit</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Donor Modal -->
+            <div class="modal fade" id="editDonorModal" tabindex="-1" aria-labelledby="editDonorModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editDonorModalLabel">Edit Donor</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="edit-donor-form">
+                                <input type="hidden" id="edit-donor-id">
+                                <div class="mb-3">
+                                    <label for="edit-donor-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="edit-donor-name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-donor-email" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="edit-donor-email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-donor-phone" class="form-label">Phone</label>
+                                    <input type="tel" class="form-control" id="edit-donor-phone" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit-donor-address" class="form-label">Address</label>
+                                    <input type="text" class="form-control" id="edit-donor-address">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="submit-edit-donor">Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <div class="tab-pane fade" id="nav-donations" role="tabpanel" aria-labelledby="nav-donations-tab" tabindex="0">
@@ -188,78 +330,9 @@
         </div>
     </div>
 
+    <script src="{% static 'script/admin.js' %}"> </script>
 
-    <script>
-        // Fetch and populate donor data
-        function fetchDonors() {
-            const donorTableBody = document.getElementById('donor-table-body');
-            axios.get('/get-donors/')
-                .then(response => {
-                    if (response.data.status === 'success') {
-                        const donors = response.data.donors;
-                        donors.forEach(donor => {
-                            const row = `
-                                     <tr>
-                                         <td>${donor.id}</td>
-                                         <td>${donor.name}</td>
-                                         <td>${donor.email}</td>
-                                         <td>${donor.phone}</td>
-                                     </tr>
-                                 `;
-                            donorTableBody.innerHTML += row;
-                        });
-                    } else {
-                        console.error('Failed to fetch donors:', response.data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching donors:', error);
-                });
-        }
-
-        // Fetch and populate donation data
-        function fetchDonations() {
-            const donationTableBody = document.getElementById('donation-table-body');
-            axios.get('/get-donations/')
-                .then(response => {
-                    if (response.data.status === 'success') {
-                        const donations = response.data.donations;
-                        donations.forEach(donation => {
-                            const row = `
-                                     <tr>
-                                         <td>${donation.donation_id}</td>
-                                         <td>${donation.donor_name}</td>
-                                         <td>${donation.donor_email}</td>
-                                         <td>${JSON.stringify(donation.food_items)}</td>
-                                         <td>${donation.pickup_address}</td>
-                                         <td>${donation.city}</td>
-                                         <td>${donation.region}</td>
-                                         <td>${donation.country}</td>
-                                         <td>${donation.pickup_date}</td>
-                                         <td>${donation.pickup_time}</td>
-                                         <td>${donation.agreement_sent ? 'Yes' : 'No'}</td>
-                                         <td>${donation.agreement_signed ? 'Yes' : 'No'}</td>
-                                     </tr>
-                                 `;
-                            donationTableBody.innerHTML += row;
-                        });
-                    } else {
-                        console.error('Failed to fetch donations:', response.data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching donations:', error);
-                });
-        }
-
-        // Initialize the page by fetching data
-        document.addEventListener('DOMContentLoaded', function () {
-            fetchDonors();
-            fetchDonations();
-        });
-    </script>
-
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>

@@ -9,6 +9,8 @@ from .services.docusign_service import send_docusign_agreement  # Custom service
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 import threading
 
 def home(request):
@@ -76,6 +78,38 @@ def get_donors(request):
         return JsonResponse({'status': 'success', 'donors': data})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
+def get_donor(request, donor_id):
+    if request.method == 'GET':
+        try:
+            donor = Donor.objects.get(id=donor_id)
+            donations = donor.donation_set.all()
+
+            # Calculate total donations (based on number of donations)
+            total_donations = donations.count()
+
+            # Construct donation history
+            donation_history = [
+                {
+                    'date': donation.pickup_date.strftime('%Y-%m-%d'),
+                    'amount': sum(item['quantity'] for item in donation.food_items.values())  # Example sum logic
+                }
+                for donation in donations
+            ]
+
+            # Prepare response data
+            data = {
+                'id': donor.id,
+                'name': donor.name,
+                'email': donor.email,
+                'phone': donor.phone,
+                'total_donations': total_donations,
+                'donation_history': donation_history
+            }
+            return JsonResponse({'status': 'success', 'donor': data})
+        except Donor.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Donor not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
 def get_donations(request):
     if request.method == 'GET':
         donations = Donation.objects.select_related('donor').all()
@@ -101,6 +135,61 @@ def get_donations(request):
         ]
         return JsonResponse({'status': 'success', 'donations': data})
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+def add_donor(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        address = request.POST.get('address')
+
+        if name and email and phone:
+            donor = Donor.objects.create(name=name, email=email, phone=phone, address=address)
+            return JsonResponse({'status': 'success', 'message': 'Donor added successfully'})
+        return JsonResponse({'status': 'error', 'message': 'Missing required fields'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+# Edit Donor
+def edit_donor(request, donor_id):
+    if request.method == 'PUT':
+        import json
+        data = json.loads(request.body)
+
+        try:
+            donor = Donor.objects.get(id=donor_id)
+            donor.name = data.get('name', donor.name)
+            donor.email = data.get('email', donor.email)
+            donor.phone = data.get('phone', donor.phone)
+            # donor.address = data.get('address', donor.address)
+            donor.save()
+
+            return JsonResponse({'status': 'success', 'message': 'Donor updated successfully'})
+        except Donor.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Donor not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+def delete_donor(request, donor_id):
+    if request.method == 'POST':
+        try:
+            donor = Donor.objects.get(id=donor_id)
+            donor.delete()
+            return JsonResponse({'status': 'success', 'message': 'Donor deleted successfully'})
+        except Donor.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Donor not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+@receiver(post_save, sender=Donation)
+def update_total_donations_on_save(sender, instance, **kwargs):
+    donor = instance.donor
+    donor.total_donations = donor.donation_set.count()
+    donor.save()
+
+@receiver(post_delete, sender=Donation)
+def update_total_donations_on_delete(sender, instance, **kwargs):
+    donor = instance.donor
+    donor.total_donations = donor.donation_set.count()
+    donor.save()
 
 def is_admin(user):
     return user.groups.filter(name='admin').exists()

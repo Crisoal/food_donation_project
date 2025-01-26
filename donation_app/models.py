@@ -7,6 +7,7 @@ class Donor(models.Model):
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=15)
+    total_donations = models.PositiveIntegerField(default=0)  # New field
 
 class Donation(models.Model):
     donor = models.ForeignKey(Donor, on_delete=models.CASCADE)
