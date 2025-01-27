@@ -155,6 +155,173 @@ fetch('/api/get_impact_metrics/')
 
 
 // Simulate pickup process (for now)
-function simulatePickup() {
-    $('#pickup-status').html('<p>Pickup has been scheduled. Awaiting logistics update.</p>');
+function simulatePickup(donationId) {
+    // Simulate the pickup and change donation status
+    $.ajax({
+        type: 'POST',
+        url: '{% url "simulate_pickup" %}',  // Create a Django URL for the backend to handle this request
+        data: {
+            'donation_id': donationId,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        },
+        success: function (response) {
+            if (response.success) {
+                // Update the donation status and pickup date in the table dynamically
+                $('#donation-' + donationId + ' .pickup-status').text('Pickup Scheduled');
+                $('#donation-' + donationId + ' .pickup-date').text(response.pickup_date);
+                // Optionally, show a success message
+                alert('Pickup has been scheduled.');
+            } else {
+                alert('Error simulating pickup.');
+            }
+        }
+    });
 }
+
+
+// Simulated data for Chart.js (Impact Chart)
+const impactData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [{
+        label: 'Impact Over Time (USD)',
+        data: [3500, 4000, 2500, 3000, 4500, 5000],
+        backgroundColor: 'rgba(45, 106, 79, 0.2)',
+        borderColor: 'rgba(45, 106, 79, 1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        pointBackgroundColor: 'rgba(45, 106, 79, 1)',
+        pointHoverBackgroundColor: 'rgba(45, 106, 79, 0.8)'
+    }]
+};
+
+const ctx = document.getElementById('impactChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: impactData,
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    font: {
+                        size: 14
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (tooltipItem) {
+                        return tooltipItem.dataset.label + ': $' + tooltipItem.raw;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function (value) {
+                        return '$' + value;
+                    }
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        }
+    }
+});
+
+// D3.js Interactive Graph (Traffic Impact Analysis)
+const data = [
+    { time: '00:00', impact: 35 },
+    { time: '01:00', impact: 45 },
+    { time: '02:00', impact: 40 },
+    { time: '03:00', impact: 55 },
+    { time: '04:00', impact: 60 },
+    { time: '05:00', impact: 80 },
+    { time: '06:00', impact: 75 }
+];
+
+const margin = { top: 20, right: 30, bottom: 50, left: 40 },
+    width = 600 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
+
+const svg = d3.select("#d3-graph")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+const x = d3.scaleBand()
+    .domain(data.map(d => d.time))
+    .range([0, width])
+    .padding(0.1);
+
+const y = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.impact)])
+    .nice()
+    .range([height, 0]);
+
+svg.append("g")
+    .selectAll(".bar")
+    .data(data)
+    .enter().append("rect")
+    .attr("class", "bar")
+    .attr("x", d => x(d.time))
+    .attr("y", d => y(d.impact))
+    .attr("width", x.bandwidth())
+    .attr("height", d => height - y(d.impact))
+    .attr("fill", "#2d6a4f")
+    .append("title")
+    .text(d => `Impact: ${d.impact}`);
+
+svg.append("g")
+    .attr("class", "x-axis")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+    .style("font-size", "12px")
+    .style("text-anchor", "middle");
+
+svg.append("g")
+    .attr("class", "y-axis")
+    .call(d3.axisLeft(y))
+    .selectAll("text")
+    .style("font-size", "12px");
+
+// Handle Report Download
+document.getElementById("downloadReport").addEventListener("click", function () {
+    const reportContent = document.getElementById('v-pills-reporting').innerHTML;
+    const blob = new Blob([reportContent], { type: 'application/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'report.html';
+    link.click();
+});
+
+
+const chatContainer = document.getElementById('chat-container');
+chatContainer.scrollTop = chatContainer.scrollHeight; // Keeps the latest message in view when new messages are added
+
+function scrollToDonations() {
+    const donationsSection = document.getElementById('donations-section');
+    donationsSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const capacityElement = document.getElementById("capacity");
+    const capacityValue = capacityElement.textContent.trim();
+    if (!capacityValue.toLowerCase().includes("beneficiaries")) {
+        capacityElement.textContent = `${capacityValue} Beneficiaries`;
+    }
+});

@@ -387,3 +387,4 @@ def agreement(request):
 
 def confirmation(request):
     return render(request, 'confirmation.html')
+

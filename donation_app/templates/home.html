@@ -18,6 +18,8 @@
        
 </head>
 
+
+
 <body>
     <!-- Header Section -->
     <nav>
@@ -34,16 +36,17 @@
             <a href="{% url 'donate_food' %}" target="_blank" class="btn">Donate Food</a>
         </div>
     </nav>
-
+    
     <!-- Hero Section -->
     <section id="hero">
         <div class="hero-content">
-            <h1>Bridging Communities, One Meal at a Time</h1>
-            <p>Join us in reducing food waste and addressing hunger through seamless digital solutions powered by
-                DocuSign.</p>
+            <h1 style="color: #f4f4f4; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);">Bridging Communities, One Meal at a Time</h1>
+            <h6 style="color: #ffffff; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);">
+                Join us in reducing food waste and addressing hunger through seamless digital solutions powered by DocuSign.
+            </h6>
             <div class="hero-buttons">
                 <a href="{% url 'donate_food' %}" target="_blank" class="btn">Donate Food</a>
-                <a href="#get-involved" class="btn secondary">Get Started</a>
+                <a href="{% url 'login' %}" target="_blank" class="btn secondary">Get Started</a>
             </div>
         </div>
     </section>
