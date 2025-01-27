@@ -6,7 +6,6 @@ import requests
 from dotenv import load_dotenv
 from datetime import datetime
 from django.http import HttpResponse
-from reportlab.pdfgen import canvas
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -16,12 +15,10 @@ def send_docusign_agreement(donor, donation):
     DOCUSIGN_ACCOUNT_ID = os.getenv("DOCUSIGN_ACCOUNT_ID")
     DOCUSIGN_BASE_PATH = "https://demo.docusign.net/restapi"
 
-    # Check if DocuSign credentials are available
     if not DOCUSIGN_ACCESS_TOKEN or not DOCUSIGN_ACCOUNT_ID:
         print("Error: Missing DocuSign access token or account ID.")
         return
 
-    # Prepare document content
     document_content = f"""
 ============================
       DONATION AGREEMENT
@@ -85,9 +82,6 @@ Signature:
 
 """
 
-    print("Document content prepared:\n", document_content)
-
-    # Base64 encode the document content
     encoded_agreement_content = base64.b64encode(document_content.encode('utf-8')).decode('utf-8')
 
     docusign_api_url = f"{DOCUSIGN_BASE_PATH}/v2.1/accounts/{DOCUSIGN_ACCOUNT_ID}/envelopes"
@@ -96,7 +90,6 @@ Signature:
         'Content-Type': 'application/json',
     }
 
-    # Prepare payload for sending the document
     payload = {
         "emailSubject": "Please sign the donation agreement",
         "documents": [
@@ -130,18 +123,16 @@ Signature:
         "status": "sent",
     }
 
-    print("Payload prepared for DocuSign API:", payload)
-
-    # Send request to DocuSign API
     response = requests.post(docusign_api_url, json=payload, headers=headers)
-    print("DocuSign API response:", response.status_code, response.text)
 
     if response.status_code == 201:
         envelope_id = response.json().get('envelopeId')
         donation.docusign_envelope_id = envelope_id
         donation.agreement_sent = True
         donation.save()
-        print(f"DocuSign agreement sent successfully. Envelope ID: {envelope_id}")
+
+        # Trigger recurring donation setup after agreement is sent
+        setup_recurring_donation(donor, donation)
     else:
         print("Failed to send DocuSign agreement:", response.text)
 
@@ -156,9 +147,6 @@ def fetch_signed_agreement(donation):
         print("Error: Envelope ID not found for the donation.")
         return
 
-    print(f"Fetching signed document for Envelope ID: {envelope_id}")
-
-    # Fetch envelope details to get signed status and timestamp
     envelope_url = f"{DOCUSIGN_BASE_PATH}/v2.1/accounts/{DOCUSIGN_ACCOUNT_ID}/envelopes/{envelope_id}"
     headers = {
         'Authorization': f'Bearer {DOCUSIGN_ACCESS_TOKEN}',
@@ -169,27 +157,27 @@ def fetch_signed_agreement(donation):
         envelope_data = envelope_response.json()
         status = envelope_data.get("status")
         signed_date = envelope_data.get("completedDateTime")
-        print(f"Envelope status: {status}, Signed date: {signed_date}")
 
         if status == "completed":
-            # Fetch the signed document
             document_url = f"{DOCUSIGN_BASE_PATH}/v2.1/accounts/{DOCUSIGN_ACCOUNT_ID}/envelopes/{envelope_id}/documents/1"
             document_response = requests.get(document_url, headers=headers)
             if document_response.status_code == 200:
-                # Save the signed document
                 signed_document = base64.b64encode(document_response.content).decode('utf-8')
                 donation.signed_document = signed_document
                 donation.agreement_signed = True
                 donation.agreement_signed_at = signed_date
                 donation.save()
 
-                print("Signed agreement fetched and saved successfully.")
+                # Setup recurring donation after the agreement is signed
+                setup_recurring_donation(donor, donation)
             else:
                 print("Failed to fetch signed document:", document_response.text)
         else:
             print("Document not yet signed.")
     else:
         print("Failed to fetch envelope details:", envelope_response.text)
+
+
 
 
 def download_signed_document(donation):
@@ -219,3 +207,4 @@ def download_signed_document(donation):
         response = HttpResponse(f.read(), content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="donation_{donation.id}_signed_agreement.pdf"'
         return response
+

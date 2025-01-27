@@ -7,20 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DonateToFeed</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
     <!-- Include Bootstrap CSS for modal styling -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
     <script src="https://kit.fontawesome.com/db37cdae57.js" crossorigin="anonymous"></script>
+
+       
 </head>
 
 <body>
     <!-- Header Section -->
     <nav>
         <div class="logo">
-            <a href="{% url 'home' %}">DonateToFeed</a>
+            <a href="{% url 'home' %}" class="logo-link">DonateToFeed</a>
         </div>
         <ul class="nav-links">
             <li><a href="#about-us" class="nav-link">About Us</a></li>
@@ -40,45 +42,32 @@
             <p>Join us in reducing food waste and addressing hunger through seamless digital solutions powered by
                 DocuSign.</p>
             <div class="hero-buttons">
-                    <a href="{% url 'donate_food' %}" target="_blank" class="btn">Donate Food</a>
+                <a href="{% url 'donate_food' %}" target="_blank" class="btn">Donate Food</a>
                 <a href="#get-involved" class="btn secondary">Get Started</a>
             </div>
         </div>
     </section>
 
-    <!-- Modal for Donation Selection -->
-    <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered"> <!-- Added modal-dialog-centered class -->
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="donateModalLabel">Donate Food</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Are you donating as a guest or a logged-in user?</p>
-                    <div class="d-flex justify-content-around mt-4">
-                        <a href="#login" class="btn btn-primary">Log In</a>
-                        <a href="{% url 'donate_food' %}" target="_blank" class="btn btn-secondary">Guest</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <!-- About Section -->
     <section id="about-us">
         <h2>What We Do</h2>
-        <p>DonateToFeed leverages technology to connect food donors with non-profits and recipients in need, ensuring no
-            meal goes to waste.</p>
+        <p style="margin-left: 10%; margin-right: 10%; ">DonateToFeed leverages technology to connect food donors with non-profits and recipients in need, ensuring no
+            meal goes to waste. Our goal is to make food donation easy, transparent, and impactful.</p>
         <div class="impact-metrics">
             <div class="metric">
+                <i class="fas fa-utensils fa-3x"></i>
                 <h3>Meals Saved</h3>
-                <p>50,000</p>
+                <p>50,000+</p>
             </div>
             <div class="metric">
+                <i class="fas fa-dumpster fa-3x"></i>
                 <h3>Food Donated</h3>
                 <p>20 Tons</p>
+            </div>
+            <div class="metric">
+                <i class="fas fa-handshake fa-3x"></i>
+                <h3>Donors</h3>
+                <p>1,000+</p>
             </div>
         </div>
     </section>
@@ -88,35 +77,19 @@
         <h2>How It Works</h2>
         <div class="how-it-works-content">
             <div class="step">
+                <i class="fas fa-donate fa-2x"></i>
                 <h3>For Donors</h3>
                 <p>Fill out food details → Sign agreement → Donation scheduled for pickup/delivery.</p>
             </div>
             <div class="step">
+                <i class="fas fa-hand-holding-heart fa-2x"></i>
                 <h3>For Non-Profits</h3>
                 <p>Manage donations via the dashboard → Track agreements → Measure impact.</p>
             </div>
             <div class="step">
+                <i class="fas fa-people-carry fa-2x"></i>
                 <h3>For Recipients</h3>
                 <p>Get notified of donations → Confirm receipt.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Stories Section -->
-    <section id="get-involved">
-        <h2>Impact in Action</h2>
-        <div class="stories">
-            <div class="story">
-                <img src="{% static 'images/serving-food.jpg' %}" alt="Donor">
-                <p>"The process was seamless, and it felt great to contribute!" - John Doe, Donor</p>
-            </div>
-            <div class="story">
-                <img src="{% static 'images/serving-food.jpg' %}" alt="Non-Profit">
-                <p>"Our organization has made a bigger impact with DonateToFeed." - Jane Smith, Non-Profit</p>
-            </div>
-            <div class="story">
-                <img src="{% static 'images/serving-food.jpg' %}" alt="Recipient">
-                <p>"Thanks to DonateToFeed, I received food just when I needed it." - Tom Brown, Recipient</p>
             </div>
         </div>
     </section>
@@ -124,7 +97,8 @@
     <!-- Call-to-Action Section -->
     <section id="cta">
         <h2>Join the Movement</h2>
-        <p>Whether you're a donor or a non-profit, your participation can create lasting change.</p>
+        <p>Whether you're a donor or a non-profit, your participation can create lasting change. Help us bridge the gap
+            between excess food and those in need.</p>
         <div class="cta-buttons">
             <a href="{% url 'donate_food' %}" class="btn">Start Donating</a>
             <a href="#get-involved" class="btn secondary">Create an Account</a>
@@ -141,13 +115,16 @@
             <p>Email: info@donatetofeed.org | Phone: +123456789</p>
             <div class="social-icons">
                 <!-- Add social media icons -->
+                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
         <p>&copy; 2025 DonateToFeed. All Rights Reserved.</p>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 </body>
 
