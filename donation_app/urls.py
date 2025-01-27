@@ -4,6 +4,7 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 from users.views import CustomLoginView, CustomLogoutView
+from .views import non_profit_dashboard, serve_signed_document
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -24,11 +25,15 @@ urlpatterns = [
     
     # Admin/Donations
     path('get-donations/', views.get_donations, name='get_donations'),
+    path('assign-nonprofit/', views.assign_nonprofit, name='assign-nonprofit'),
+    path('get-nonprofits/', views.get_nonprofits, name='get-nonprofits'),
 
     # Non-Profit
     path('non-profit-dashboard/', views.non_profit_dashboard, name='non_profit_dashboard'),
     path('api/nonprofit/profile/', views.fetch_nonprofit_profile, name='fetch_nonprofit_profile'),
     path('api/donations/<int:donation_id>/', views.fetch_donation_details, name='fetch_donation_details'),
+    path('download-signed-agreement/<int:donation_id>/', serve_signed_document, name='serve_signed_document'),
+
 
     # Auth
     path('login/', CustomLoginView.as_view(), name='login'),

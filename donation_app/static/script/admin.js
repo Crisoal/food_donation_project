@@ -216,6 +216,8 @@ function fetchDonations() {
         });
 }
 
+
+
 // Initialize the page by fetching data
 document.addEventListener('DOMContentLoaded', function () {
     fetchDonors();

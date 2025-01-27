@@ -5,19 +5,23 @@ from .forms import DonationForm
 from django.http import JsonResponse
 from .models import Donor, Donation, NonprofitProfile
 from django.db import transaction
-from .services.docusign_service import send_docusign_agreement  # Custom service for DocuSign API
-from .services.matching_service import match_donation_to_nonprofit  # Import matching service
-from django.db import transaction
+from .services.docusign_service import send_docusign_agreement, fetch_signed_agreement  # Import fetch_signed_agreement
+from .services.matching_service import match_donation_to_nonprofit
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
+import threading
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-import threading
 from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .services.docusign_service import fetch_signed_agreement
+from django.http import HttpResponse
+from django.shortcuts import redirect
+from .services.docusign_service import download_signed_document
 
 def home(request):
     return render(request, 'home.html')
@@ -31,6 +35,7 @@ def submit_donation(request):
         form = DonationForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
+                # Fetch or create donor
                 donor, created = Donor.objects.get_or_create(
                     email=form.cleaned_data['donor_email'],
                     defaults={
@@ -38,6 +43,8 @@ def submit_donation(request):
                         'phone': form.cleaned_data['donor_phone'],
                     }
                 )
+
+                # Create new donation
                 donation = Donation.objects.create(
                     donor=donor,
                     food_items=form.cleaned_data['food_items'],
@@ -49,37 +56,35 @@ def submit_donation(request):
                     pickup_date=form.cleaned_data['pickup_date'],
                     pickup_time=form.cleaned_data['pickup_time'],
                 )
+
                 try:
-                    # Send agreement via DocuSign and update the agreement_sent field
-                    send_docusign_agreement(donor, donation)  # Pass donor and donation
+                    # Send agreement and update status
+                    send_docusign_agreement(donor, donation)
                     donation.agreement_sent = True
                     donation.save()
 
-                    # Logic to monitor agreement status
-                    # Here you could call fetch_signed_agreement to check if the agreement has been signed
-                    fetch_signed_agreement(donation)  # Ensure this function updates `agreement_signed`
-                    
+                    # Trigger donation matching asynchronously
+                    threading.Thread(
+                        target=match_donation_to_nonprofit,
+                        args=(donation,)
+                    ).start()
+
+                    print('Donation submitted successfully')  # Debug statement
+                    return JsonResponse({'status': 'success', 'message': 'Donation submitted successfully'})
+                
                 except Exception as e:
+                    print(f"Failed to send the agreement: {str(e)}")  # Debug statement
                     return JsonResponse({
                         'status': 'error',
                         'message': f"Failed to send the agreement: {str(e)}"
                     })
-
-                # Trigger donation matching process asynchronously
-                threading.Thread(
-                    target=match_donation_to_nonprofit,
-                    args=(donation,)
-                ).start()
-
-            return JsonResponse({
-                'status': 'success',
-                'email': donor.email
-            })
+        
         else:
+            print(f"Form errors: {form.errors}")  # Debug statement
             return JsonResponse({'status': 'error', 'errors': form.errors})
-
+    
+    print('Invalid request method')  # Debug statement
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-
 
 def get_donors(request):
     if request.method == 'GET':
@@ -131,8 +136,19 @@ def get_donor(request, donor_id):
 def get_donations(request):
     if request.method == 'GET':
         donations = Donation.objects.select_related('donor').all()
-        data = [
-            {
+        data = []
+
+        for donation in donations:
+            # Fetch the signed document if it's not already signed and available
+            if not donation.agreement_signed and donation.agreement_sent:
+                # If agreement was sent but not signed, fetch the signed document asynchronously
+                threading.Thread(
+                    target=fetch_signed_agreement,
+                    args=(donation,)
+                ).start()
+
+            # Add the donation data
+            data.append({
                 'donation_id': donation.id,
                 'donor_name': donation.donor.name,
                 'donor_email': donation.donor.email,
@@ -147,12 +163,53 @@ def get_donations(request):
                 'pickup_time': donation.pickup_time.strftime('%H:%M:%S'),
                 'agreement_sent': donation.agreement_sent,
                 'agreement_signed': donation.agreement_signed,
+                'signed_document': donation.signed_document,  # Include the signed document URL/ID
                 'created_at': donation.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-            }
-            for donation in donations
-        ]
+            })
+
         return JsonResponse({'status': 'success', 'donations': data})
+    
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+def assign_donation(request, donation_id):
+    if request.method == 'POST':
+        nonprofit_id = request.POST.get('nonprofit_id')
+        donation = get_object_or_404(Donation, pk=donation_id)
+        nonprofit = get_object_or_404(NonprofitProfile, pk=nonprofit_id)
+        
+        # Assign and update status
+        donation.matched_nonprofit = nonprofit
+        donation.status = 'assigned'
+        donation.save()
+
+        return JsonResponse({'status': 'success', 'message': 'Donation assigned successfully.'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+def assign_nonprofit(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        donation_id = data.get('donation_id')
+        nonprofit_id = data.get('nonprofit_id')
+        
+        try:
+            donation = Donation.objects.get(id=donation_id)
+            nonprofit = NonprofitProfile.objects.get(id=nonprofit_id)
+            donation.matched_nonprofit = nonprofit
+            donation.status = 'assigned'
+            donation.save()
+            return JsonResponse({'status': 'success', 'message': 'Nonprofit assigned successfully'})
+        except Donation.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Donation not found'})
+        except NonprofitProfile.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Nonprofit not found'})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+def get_nonprofits(request):
+    nonprofits = NonprofitProfile.objects.all()
+    data = [{'id': np.id, 'name': np.organization_name} for np in nonprofits]
+    return JsonResponse({'status': 'success', 'nonprofits': data})
+
 
 def add_donor(request):
     if request.method == 'POST':
@@ -236,7 +293,19 @@ def non_profit_dashboard(request):
         messages.error(request, "No profile found for your account. Please contact support.")
         return redirect('home')  # Redirect to a safe page
 
+    # Get donations associated with the nonprofit
     donations = Donation.objects.filter(matched_nonprofit=nonprofit_profile)
+
+    # For each donation, check if the agreement is signed and fetch the signed document
+    for donation in donations:
+        if donation.agreement_sent and not donation.agreement_signed:
+            # Trigger fetching the signed agreement if it hasn't been signed yet
+            threading.Thread(
+                target=fetch_signed_agreement,
+                args=(donation,)
+            ).start()
+
+    # Get distinct donors associated with the nonprofit
     donors = Donor.objects.filter(donation__matched_nonprofit=nonprofit_profile).distinct()
 
     context = {
@@ -247,6 +316,13 @@ def non_profit_dashboard(request):
 
     return render(request, 'non_profit_dashboard.html', context)
 
+def serve_signed_document(request, donation_id):
+    donation = Donation.objects.get(id=donation_id)
+    response = download_signed_document(donation)
+    if response:
+        return response
+    else:
+        return HttpResponse("Error: Unable to download the document.", status=404)
 
 @login_required
 @user_passes_test(is_nonprofit)
@@ -271,6 +347,8 @@ def fetch_nonprofit_profile(request):
     }
 
     return JsonResponse(data)
+
+
 
 
 @login_required

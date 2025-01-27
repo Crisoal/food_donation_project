@@ -51,6 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
+                // Determine the badge color based on donation status
+                let statusBadge = '';
+                if (data.status === 'pending') {
+                    statusBadge = `<span class="badge bg-warning">Pending</span>`;
+                } else if (data.status === 'assigned') {
+                    statusBadge = `<span class="badge bg-primary">Assigned</span>`;
+                } else if (data.status === 'completed') {
+                    statusBadge = `<span class="badge bg-success">Completed</span>`;
+                } else {
+                    statusBadge = `<span class="badge bg-secondary">Unknown</span>`;
+                }
+
                 // Populate modal with donation details
                 donationDetailsContent.innerHTML = `
                     <div class="row mb-3">
@@ -59,10 +71,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p><strong>Donor Name:</strong> ${data.donor_name}</p>
                             <p><strong>Donor Email:</strong> ${data.donor_email}</p>
                             <p><strong>Donor Phone:</strong> ${data.donor_phone}</p>
+                            
                         </div>
                         <div class="col-md-6">
                             <p><strong>Pickup Address:</strong> ${data.pickup_address}, ${data.city}, ${data.region}, ${data.country} (${data.postal_code})</p>
-                            <p><strong>Status:</strong> ${data.status}</p>
+                            <p><strong>Status:</strong> ${statusBadge}</p>
                             <p><strong>Perishable Status:</strong> ${data.perishable_status}</p>
                             <p><strong>Pickup Date:</strong> ${data.pickup_date}</p>
                             <p><strong>Pickup Time:</strong> ${data.pickup_time}</p>

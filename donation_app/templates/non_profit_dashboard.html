@@ -164,7 +164,9 @@
                 </form>
             </div>
 
+
             <!-- Donations Table -->
+
             <div class="table-responsive">
                 <table class="table table-striped align-middle">
                     <thead>
@@ -176,6 +178,7 @@
                             <th>Perishable Status</th>
                             <th>Agreement Sent</th>
                             <th>Agreement Signed</th>
+                            <th>Agreement Signed At</th> <!-- New Column -->
                             <th>Pickup Date</th>
                             <th>Actions</th>
                         </tr>
@@ -187,9 +190,16 @@
                             <td>{{ donation.donor.name }}</td>
                             <td>{{ donation.city }}</td>
                             <td>
-                                <span class="badge bg-{{ donation.status|lower }}">
-                                    {{ donation.status }}
-                                </span>
+                                <!-- Assigning badges based on donation status -->
+                                {% if donation.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                                {% elif donation.status == 'assigned' %}
+                                <span class="badge bg-primary">Assigned</span>
+                                {% elif donation.status == 'completed' %}
+                                <span class="badge bg-success">Completed</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Unknown</span>
+                                {% endif %}
                             </td>
                             <td>{{ donation.perishable_status }}</td>
                             <td>
@@ -206,11 +216,19 @@
                                 <span class="badge bg-warning">Not Signed</span>
                                 {% endif %}
                             </td>
+                            <td>
+                                {% if donation.agreement_signed_at %}
+                                {{ donation.agreement_signed_at|date:"Y-m-d H:i:s" }}
+                                {% else %}
+                                <span class="text-muted">N/A</span>
+                                {% endif %}
+                            </td>
                             <td>{{ donation.pickup_date }}</td>
                             <td>
                                 <div class="btn-group" role="group">
                                     {% if donation.agreement_signed %}
-                                    <a href="{{ donation.signed_document }}" class="btn btn-success btn-sm" download>
+                                    <a href="{% url 'serve_signed_document' donation.id %}"
+                                        class="btn btn-success btn-sm" download>
                                         View Agreement
                                     </a>
                                     {% else %}
@@ -225,9 +243,10 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-
                 </table>
             </div>
+
+
 
             <!-- Donation Details Modal -->
             <!-- Updated Donation Details Modal -->
