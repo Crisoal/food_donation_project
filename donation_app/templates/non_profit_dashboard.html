@@ -66,8 +66,6 @@
         <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
             <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home"
                 type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">Home</button>
-            <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile"
-                type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">Profile</button>
             <button class="nav-link" id="v-pills-donations-tab" data-bs-toggle="pill"
                 data-bs-target="#v-pills-donations" type="button" role="tab" aria-controls="v-pills-donations"
                 aria-selected="false">Donations</button>
@@ -92,18 +90,6 @@
 
         <!-- Home Section -->
         <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
-            <div id="signed-agreements">
-                <h5>Signed Donation Agreements</h5>
-                <!-- Dynamic content will be loaded here -->
-            </div>
-            <div id="donation-status">
-                <h5>Donation Status</h5>
-                <!-- Dynamic content will be loaded here -->
-            </div>
-        </div>
-
-        <!-- Profile Section -->
-        <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
             <div class="container mt-4">
                 <!-- NGO Banner -->
                 <div class="position-relative mb-4">
@@ -145,10 +131,122 @@
 
         <!-- Donations Section -->
         <div class="tab-pane fade" id="v-pills-donations" role="tabpanel" aria-labelledby="v-pills-donations-tab">
-            <h3>Donation Management</h3>
-            <!-- Example of donation management -->
-            <button class="btn btn-primary" onclick="simulatePickup()">Simulate Pickup</button>
-            <div id="pickup-status"></div>
+            <h3 class="mb-4">Donation Management</h3>
+
+            <!-- Search and Filter Section -->
+            <div class="card p-3 mb-4">
+                <form id="search-filter-form" class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label for="search-donation" class="form-label">Search</label>
+                        <input type="text" id="search-donation" class="form-control"
+                            placeholder="Search by donor or city">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="status-filter" class="form-label">Status</label>
+                        <select id="status-filter" class="form-select">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="perishable-filter" class="form-label">Perishable Status</label>
+                        <select id="perishable-filter" class="form-select">
+                            <option value="">All</option>
+                            <option value="Perishable">Perishable</option>
+                            <option value="Non-perishable">Non-perishable</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <button type="button" id="apply-filters" class="btn btn-primary">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Donations Table -->
+            <div class="table-responsive">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Donation ID</th>
+                            <th>Donor Name</th>
+                            <th>City</th>
+                            <th>Status</th>
+                            <th>Perishable Status</th>
+                            <th>Agreement Sent</th>
+                            <th>Agreement Signed</th>
+                            <th>Pickup Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="donations-table-body">
+                        {% for donation in donations %}
+                        <tr>
+                            <td>{{ donation.id }}</td>
+                            <td>{{ donation.donor.name }}</td>
+                            <td>{{ donation.city }}</td>
+                            <td>
+                                <span class="badge bg-{{ donation.status|lower }}">
+                                    {{ donation.status }}
+                                </span>
+                            </td>
+                            <td>{{ donation.perishable_status }}</td>
+                            <td>
+                                {% if donation.agreement_sent %}
+                                <span class="badge bg-success">Sent</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Not Sent</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if donation.agreement_signed %}
+                                <span class="badge bg-success">Signed</span>
+                                {% else %}
+                                <span class="badge bg-warning">Not Signed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ donation.pickup_date }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    {% if donation.agreement_signed %}
+                                    <a href="{{ donation.signed_document }}" class="btn btn-success btn-sm" download>
+                                        View Agreement
+                                    </a>
+                                    {% else %}
+                                    <span class="btn btn-secondary btn-sm disabled">No Agreement</span>
+                                    {% endif %}
+                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#donationDetailsModal" data-donation-id="{{ donation.id }}">
+                                        View Details
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Donation Details Modal -->
+            <!-- Updated Donation Details Modal -->
+            <div class="modal fade" id="donationDetailsModal" tabindex="-1" aria-labelledby="donationDetailsModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="donationDetailsModalLabel">Donation Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="donation-details-content" class="container-fluid">
+                                <p class="text-center">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Messages Section (Logistics updates) -->

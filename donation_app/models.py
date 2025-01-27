@@ -22,6 +22,9 @@ class Donation(models.Model):
     postal_code = models.CharField(max_length=10)
     agreement_sent = models.BooleanField(default=False)
     agreement_signed = models.BooleanField(default=False)
+    agreement_signed_at = models.DateTimeField(null=True, blank=True)  # Timestamp when signed
+    signed_document = models.TextField(null=True, blank=True)
+    docusign_envelope_id = models.CharField(max_length=255, null=True, blank=True)  # New field for envelope ID
     pickup_date = models.DateField(default=timezone.now)
     pickup_time = models.TimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)

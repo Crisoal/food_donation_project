@@ -33,22 +33,10 @@ def match_donation_to_nonprofit(donation):
         donation.matched_nonprofit = nonprofit
         donation.status = 'assigned'
         donation.save()
-
-        # # Send notification to the nonprofit
-        # send_notification(nonprofit)
     else:
         # If no match found, leave donation in "pending" state
         print("No matching nonprofit found. Donation status set to 'pending'.")
         donation.status = 'pending'
         donation.save()
 
-# def send_notification(nonprofit):
-#     # Send an email notification to the non-profit
-#     send_mail(
-#         'New Donation Matched',
-#         f'Your organization, {nonprofit.organization_name}, has been matched with a new donation.',
-#         'no-reply@donationapp.com',
-#         [nonprofit.user.email],
-#         fail_silently=False,
-#     )
-#     print(f"Notification sent to {nonprofit.organization_name} at {nonprofit.user.email}")
+

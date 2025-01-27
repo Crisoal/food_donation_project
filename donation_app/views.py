@@ -14,6 +14,10 @@ from django.contrib.auth.models import Group
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 import threading
+from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .services.docusign_service import fetch_signed_agreement
 
 def home(request):
     return render(request, 'home.html')
@@ -27,7 +31,6 @@ def submit_donation(request):
         form = DonationForm(request.POST)
         if form.is_valid():
             with transaction.atomic():
-                # Save donor details
                 donor, created = Donor.objects.get_or_create(
                     email=form.cleaned_data['donor_email'],
                     defaults={
@@ -35,8 +38,6 @@ def submit_donation(request):
                         'phone': form.cleaned_data['donor_phone'],
                     }
                 )
-
-                # Save donation details, including pickup date and time
                 donation = Donation.objects.create(
                     donor=donor,
                     food_items=form.cleaned_data['food_items'],
@@ -48,6 +49,21 @@ def submit_donation(request):
                     pickup_date=form.cleaned_data['pickup_date'],
                     pickup_time=form.cleaned_data['pickup_time'],
                 )
+                try:
+                    # Send agreement via DocuSign and update the agreement_sent field
+                    send_docusign_agreement(donor, donation)  # Pass donor and donation
+                    donation.agreement_sent = True
+                    donation.save()
+
+                    # Logic to monitor agreement status
+                    # Here you could call fetch_signed_agreement to check if the agreement has been signed
+                    fetch_signed_agreement(donation)  # Ensure this function updates `agreement_signed`
+                    
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f"Failed to send the agreement: {str(e)}"
+                    })
 
                 # Trigger donation matching process asynchronously
                 threading.Thread(
@@ -57,12 +73,13 @@ def submit_donation(request):
 
             return JsonResponse({
                 'status': 'success',
-                'message': f"An agreement form has been sent to {donor.email}. Please check your email and sign the agreement to complete the donation."
+                'email': donor.email
             })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors})
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
 
 def get_donors(request):
     if request.method == 'GET':
@@ -254,6 +271,35 @@ def fetch_nonprofit_profile(request):
     }
 
     return JsonResponse(data)
+
+
+@login_required
+def fetch_donation_details(request, donation_id):
+    """
+    API endpoint to fetch donation details by donation ID.
+    """
+    try:
+        donation = Donation.objects.select_related('donor').get(id=donation_id)
+        data = {
+            'donation_id': donation.id,
+            'donor_name': donation.donor.name,
+            'donor_email': donation.donor.email,
+            'donor_phone': donation.donor.phone,
+            'food_items': donation.food_items,
+            'pickup_address': donation.pickup_address,
+            'city': donation.city,
+            'region': donation.region,
+            'country': donation.country,
+            'postal_code': donation.postal_code,
+            'perishable_status': donation.perishable_status,
+            'status': donation.status,
+            'pickup_date': donation.pickup_date,
+            'pickup_time': donation.pickup_time,
+        }
+        return JsonResponse(data)
+    except Donation.DoesNotExist:
+        return JsonResponse({'error': 'Donation not found'}, status=404)
+
 
 
 def agreement(request):

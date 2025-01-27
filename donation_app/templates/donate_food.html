@@ -265,11 +265,11 @@
         </div>
 
         <div id="progress-indicator" style="display: none;">
-            <p>Sending the agreement form to your email. Please wait...</p>
+            <p class="ml-4">Sending the agreement form to your email. Please wait...</p>
         </div>
+
         <div id="confirmation-message" style="display: none;"></div>
     </section>
-
 
     <!-- Footer Section -->
     <footer>
@@ -345,67 +345,67 @@
         });
     </script>
 
-<script>
-    document.getElementById('donation-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent the default form submission
-    
-        const foodItems = [];
-        document.querySelectorAll('.food-donation').forEach(function (row) {
-            const foodType = row.querySelector('[name="food_type[]"]').value;
-            const foodQuantity = row.querySelector('[name="food_quantity[]"]').value;
-            const foodCondition = row.querySelector('[name="food_condition[]"]').value;
-            const expirationDate = row.querySelector('[name="expiration_date[]"]').value;
-    
-            if (foodType && foodQuantity && foodCondition && expirationDate) {
-                foodItems.push({
-                    food_type: foodType,
-                    quantity: foodQuantity,
-                    condition: foodCondition,
-                    expiration_date: expirationDate
-                });
-            }
+    <script>
+        document.getElementById('donation-form').addEventListener('submit', function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const foodItems = [];
+            document.querySelectorAll('.food-donation').forEach(function (row) {
+                const foodType = row.querySelector('[name="food_type[]"]').value;
+                const foodQuantity = row.querySelector('[name="food_quantity[]"]').value;
+                const foodCondition = row.querySelector('[name="food_condition[]"]').value;
+                const expirationDate = row.querySelector('[name="expiration_date[]"]').value;
+
+                if (foodType && foodQuantity && foodCondition && expirationDate) {
+                    foodItems.push({
+                        food_type: foodType,
+                        quantity: foodQuantity,
+                        condition: foodCondition,
+                        expiration_date: expirationDate
+                    });
+                }
+            });
+
+            // Add food items to a hidden input
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'food_items';
+            hiddenInput.value = JSON.stringify(foodItems);
+            this.appendChild(hiddenInput);
+
+            this.submit(); // Submit the form
         });
-    
-        // Add food items to a hidden input
-        const hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'food_items';
-        hiddenInput.value = JSON.stringify(foodItems);
-        this.appendChild(hiddenInput);
-    
-        this.submit(); // Submit the form
-    });
     </script>
-    
+
 
     <script>
-        document.getElementById('donation-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            document.getElementById('progress-indicator').style.display = 'block';
+        const form = document.getElementById('donation-form');
+        const progressIndicator = document.getElementById('progress-indicator');
+        const confirmationMessage = document.getElementById('confirmation-message');
 
-            fetch("{% url 'submit_donation' %}", {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            progressIndicator.style.display = 'block';
+            const formData = new FormData(form);
+
+            const response = await fetch(form.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('progress-indicator').style.display = 'none';
-                    if (data.status === 'success') {
-                        document.getElementById('confirmation-message').textContent = data.message;
-                        document.getElementById('confirmation-message').style.display = 'block';
-                        document.getElementById('donation-form').style.display = 'none';
-                    } else {
-                        alert('Error: ' + JSON.stringify(data.errors));
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('progress-indicator').style.display = 'none';
-                    alert('Something went wrong. Please try again.');
-                });
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            progressIndicator.style.display = 'none';
+
+            if (data.status === 'success') {
+                form.style.display = 'none';  // Hide form after success
+                confirmationMessage.style.display = 'block';  // Show confirmation message
+                confirmationMessage.innerHTML = `An agreement form has been sent to ${data.email}. Please check your email and sign the agreement to complete the donation.`;
+            } else {
+                alert(data.message || 'An error occurred. Please try again.');
+            }
         });
     </script>
 
